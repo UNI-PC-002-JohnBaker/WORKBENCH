@@ -66,10 +66,19 @@ void config_uart_parameters(USART_TypeDef *USARTx, uint32_t DataWidth, uint32_t 
 uint32_t comput_uart_div(uint32_t PeriphClk, uint32_t BaudRate);
 void uart_set_baudrate(USART_TypeDef *USARTx, uint32_t PeriphClk, uint32_t BaudRate);
 void uart_enable(USART_TypeDef *USARTx);
+void uart3_tx_init(void);
+
+void uart_write(USART_TypeDef *USARTx, uint32_t value);
+void set_uart_transfer_direction(USART_TypeDef *USARTx, uint32_t TransferDirection);
 
 
 int main(void)
 {
+	int x;
+	uart3_tx_init();
+	set_uart_transfer_direction(USART3, USART_CR1_TE);
+
+
 	//*Enable clock access for Port B*/
 	//RCC_AHB1EN_R  |= GPIO_CLK_EN_B;
 	RCC->AHB1ENR |= GPIO_CLK_EN_B;  //
@@ -87,28 +96,70 @@ int main(void)
 
 	while(1)
 	{
-		//*Toggle on all LEDS*/
+
+
+
+		uart_write(USART3, 'A');
+			for(int i=0; i<9000;i++)
+			{
+				x++;
+			}
+
+
+
+
+
+
+
+
+			/*
+
+		//Toggle on all LEDS/
 		//GPIOB_ODR_R |= USER_LED1 | USER_LED2 | USER_LED3;
 
-		//*Check input (GPIOC_IDR:13)
+		//Check input (GPIOC_IDR:13)
 		if(GPIOC->IDR & BTN_PIN)
 
 		{
-			//*Turn on/off all LEDS*/
+			//Turn on/off all LEDS//
 			//GPIOB_ODR_R ^= USER_LED1 | USER_LED2 | USER_LED3;
 			//GPIOB->ODR ^= USER_LED1 | USER_LED2 | USER_LED3;
 			GPIOB->BSRR = (1U<<0) | (1U<<7) | (1U<<14);
 			//for(int i = 0;i<1000000;i++){}
+
+
 		}
+
 		else
 		{
 			GPIOB->BSRR = (1U<<16) | (1U<<23) | (1U<<30);
 			//for(int i = 0;i<1000000;i++){}
+
+
 		}
+		*/
+
+
+
+
+
+
+
+
+
 	}
 }
 
+void uart_write(USART_TypeDef *USARTx, uint32_t value)
+{
+	/*Make sure transmit data register is empty*/
+	 //USARTx->ISR & (1U<<7);
+	//while(!((USARTx->ISR & USART_ISR_TXE) == USART_ISR_TXE)){}
+	while(!(USARTx->ISR & USART_ISR_TXE)){}
 
+	/*Write value into transmit data register*/
+	USARTx->TDR = value;
+}
 
 
 void uart3_tx_init(void)
@@ -143,7 +194,7 @@ void uart3_tx_init(void)
 	config_uart_parameters(USART3, UART_DATAWIDTH_8B, UART_PARITY_NONE, UART_STOPBITS_1);
 
 	/*Set baudrate*/
-	uart_set_baudrate(USART3, 15000000, 115200);
+	uart_set_baudrate(USART3, 15000000, 19200);
 
 	/*Enable USART*/
 	//USART3->CR1 |= USART_CR1_UE;
@@ -159,6 +210,12 @@ void uart_enable(USART_TypeDef *USARTx)
 {
 	SET_BIT(USARTx->CR1,USART_CR1_UE);
 }
+
+void set_uart_transfer_direction(USART_TypeDef *USARTx, uint32_t TransferDirection)
+{
+	MODIFY_REG(USARTx->CR1, USART_CR1_RE | USART_CR1_TE, TransferDirection);
+}
+
 
 void uart_set_baudrate(USART_TypeDef *USARTx, uint32_t PeriphClk, uint32_t BaudRate)
 		{
@@ -182,19 +239,19 @@ void set_ahb1_periphclock(uint32_t perihs)
 void set_ahb2_periphclock(uint32_t perihs)
 {
 		//RCC->AHP1ENR |= perihs;
-		SET_BIT(RCC->AHB2ENR,perihs);
+		SET_BIT(RCC->AHB2ENR, perihs);
 }
 
 void set_apb1_periphclock(uint32_t perihs)
 {
 		//RCC->AHP1ENR |= perihs;
-		SET_BIT(RCC->APB1ENR,perihs);
+		SET_BIT(RCC->APB1ENR, perihs);
 }
 
 void set_apb2_periphclock(uint32_t perihs)
 {
 		//RCC->AHP1ENR |= perihs;
-		SET_BIT(RCC->APB2ENR,perihs);
+		SET_BIT(RCC->APB2ENR, perihs);
 }
 
 
@@ -233,5 +290,5 @@ void set_pin_mode(GPIO_TypeDef *GPIOx, uint32_t Pin, uint32_t Mode)
 
 uint32_t comput_uart_div(uint32_t PeriphClk, uint32_t BaudRate)
 {
-	return ((PeriphClk + BaudRate/2)/BaudRate);
+	return ((PeriphClk + (BaudRate/2U))/BaudRate);
 }
