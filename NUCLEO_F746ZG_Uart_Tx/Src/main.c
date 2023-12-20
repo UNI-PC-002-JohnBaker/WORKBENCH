@@ -14,10 +14,6 @@
 //RCC AHB1 peripheral clock register (RCC_AHB1ENR)
 //GPIO port mode register (GPIOx_MODER)
 
-//*ALTERNATE FUNCION:AF7
-// USART3 Tx:PD8
-// USART3 Rx:PD9
-
 
 //Symbolic name for enables of GPIOs (macros)
 #define GPIO_CLK_EN_B			(1U<<1)
