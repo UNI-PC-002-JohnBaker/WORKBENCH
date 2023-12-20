@@ -46,10 +46,23 @@
 #define BTN_PIN  				PIN13
 
 #define  GPIODEN				(1U<<3)
+#define  UART3_TX  				(1U<<8)
+#define  GPIO_ALTERNATE_MODE	 0x2  //0b10
 
-set_ahb1_periphclock(uint32_t perihs);
+#define  UART3EN				(1U<<18)
 
-set_pin_mode(GPIO_TypeDef *GPIOx, uint32_t Pin, uint32_t Mode);
+#define UART_DATAWIDTH_8B		0x00000000U   /*8 bits word length: Start bit, 8 data bits*/
+#define UART_PARITY_NONE		0x00000000U
+#define UART_STOPBITS_1 		0x00000000U
+
+void set_ahb1_periphclock(uint32_t perihs);
+void set_ahb2_periphclock(uint32_t perihs);
+void set_apb1_periphclock(uint32_t perihs);
+void set_apb2_periphclock(uint32_t perihs);
+
+void set_pin_mode(GPIO_TypeDef *GPIOx, uint32_t Pin, uint32_t Mode);
+void config_uart_parameters(USART_TypeDef *USARTx, uint32_t DataWidth, uint32_t Parity, uint32_t StopBits);
+
 
 
 int main(void)
@@ -69,27 +82,31 @@ int main(void)
 	//GPIOB_MODE_R |= USER_LED1_MODER | USER_LED2_MODER | USER_LED3_MODER;
 	GPIOB->MODER |= USER_LED1_MODER | USER_LED2_MODER | USER_LED3_MODER;
 
-while(1)
-{
-	//*Toggle on all LEDS*/
-	//GPIOB_ODR_R |= USER_LED1 | USER_LED2 | USER_LED3;
-
-	//*Check input (GPIOC_IDR:13)
-	if(GPIOC->IDR & BTN_PIN)
-
+	while(1)
 	{
-	//*Turn on/off all LEDS*/
-	//GPIOB_ODR_R ^= USER_LED1 | USER_LED2 | USER_LED3;
-	//GPIOB->ODR ^= USER_LED1 | USER_LED2 | USER_LED3;
-	GPIOB->BSRR = (1U<<0) | (1U<<7) | (1U<<14);
-	//for(int i = 0;i<1000000;i++){}
-	}
-	else
-	{
-	GPIOB->BSRR = (1U<<16) | (1U<<23) | (1U<<30);
-	//for(int i = 0;i<1000000;i++){}
+		//*Toggle on all LEDS*/
+		//GPIOB_ODR_R |= USER_LED1 | USER_LED2 | USER_LED3;
+
+		//*Check input (GPIOC_IDR:13)
+		if(GPIOC->IDR & BTN_PIN)
+
+		{
+			//*Turn on/off all LEDS*/
+			//GPIOB_ODR_R ^= USER_LED1 | USER_LED2 | USER_LED3;
+			//GPIOB->ODR ^= USER_LED1 | USER_LED2 | USER_LED3;
+			GPIOB->BSRR = (1U<<0) | (1U<<7) | (1U<<14);
+			//for(int i = 0;i<1000000;i++){}
+		}
+		else
+		{
+			GPIOB->BSRR = (1U<<16) | (1U<<23) | (1U<<30);
+			//for(int i = 0;i<1000000;i++){}
+		}
 	}
 }
+
+
+
 
 void uart3_tx_init(void)
 {
@@ -97,53 +114,75 @@ void uart3_tx_init(void)
 	set_ahb1_periphclock(GPIODEN); //RCC->AHB1ENR |= GPIODEN
 
 	/*2. Set PD8 mode to alternate function*/
-
+	set_pin_mode(GPIOD, UART3_TX, GPIO_ALTERNATE_MODE);
 
 	/*3. Set alternate function to USART*/
 
 
 
+	/*STM32F746xx alternate function mapping
+	(page. 76 DS) ==> ALTERNATE FUNCTION:AF7
+					USART3 TX:PD8 ==> 0111 to AFR[1]:AFR8[3:0]
+					USART3 RX:PD9 ==> 0111 to AFR[1]:AFR9[3:0]
+	*/
+
+	//AFR[1] = GPIOx_AFRH,  AFR[0] = GPIOx_AFRL
+	//alternative is use compact function but im not ready
+	GPIOD->AFR[1] |=  (1U<<0);
+	GPIOD->AFR[1] |=  (1U<<1);
+	GPIOD->AFR[1] |=  (1U<<2);
+	GPIOD->AFR[1] &= ~(1U<<3);
 
 	/*Enable clock to USART module*/
+	set_apb1_periphclock(UART3EN);
+
 	/*Configure USART parameters*/
+	config_uart_parameters(USART3, UART_DATAWIDTH_8B, UART_PARITY_NONE, UART_STOPBITS_1);
+
 	/*Set baudrate*/
 	/*Enable USART*/
+}
 
 
 
 
 
+void config_uart_parameters(USART_TypeDef *USARTx, uint32_t DataWidth, uint32_t Parity, uint32_t StopBits)
+{
+	MODIFY_REG(USARTx->CR1, USART_CR1_PS | USART_CR1_PCE | USART_CR1_M, Parity | DataWidth);
+	MODIFY_REG(USARTx->CR2, USART_CR2_STOP, StopBits);
 
 }
 
+
 void set_ahb1_periphclock(uint32_t perihs)
-		{
-			//RCC->AHP1ENR |= perihs;
-			SET_BIT(RCC->AHB1ENR,perihs);
-		}
+{
+		//RCC->AHP1ENR |= perihs;
+		SET_BIT(RCC->AHB1ENR,perihs);
+}
 
 void set_ahb2_periphclock(uint32_t perihs)
-		{
-			//RCC->AHP1ENR |= perihs;
-			SET_BIT(RCC->AHB2ENR,perihs);
-		}
+{
+		//RCC->AHP1ENR |= perihs;
+		SET_BIT(RCC->AHB2ENR,perihs);
+}
 
 void set_apb1_periphclock(uint32_t perihs)
-		{
-			//RCC->AHP1ENR |= perihs;
-			SET_BIT(RCC->APB1ENR,perihs);
-		}
+{
+		//RCC->AHP1ENR |= perihs;
+		SET_BIT(RCC->APB1ENR,perihs);
+}
 
 void set_apb2_periphclock(uint32_t perihs)
-		{
-			//RCC->AHP1ENR |= perihs;
-			SET_BIT(RCC->APB2ENR,perihs);
-		}
+{
+		//RCC->AHP1ENR |= perihs;
+		SET_BIT(RCC->APB2ENR,perihs);
+}
 
 
 void set_pin_mode(GPIO_TypeDef *GPIOx, uint32_t Pin, uint32_t Mode)
 
-	{
+{
 	/*Direct EXAMPLE*/
 	//Clear the relevant bits in the mode register
 	//GPIO->MODER  &=~(1U<<16);
@@ -172,7 +211,5 @@ void set_pin_mode(GPIO_TypeDef *GPIOx, uint32_t Pin, uint32_t Mode)
 
 	MODIFY_REG(GPIOx->MODER, (0x3 << (POSITION_VAL(Pin) * 2U)), (Mode << (POSITION_VAL(Pin) * 2U)));
 
-	}
-
-
 }
+
