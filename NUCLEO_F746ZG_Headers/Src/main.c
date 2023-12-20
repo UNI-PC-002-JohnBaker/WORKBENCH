@@ -1,0 +1,57 @@
+#include "stm32f7xx.h"
+
+
+//#include <stdint.h>
+
+
+
+
+//Symbolic name for enables of GPIOs (macros)
+#define GPIO_CLK_EN_B			(1U<<1)
+#define GPIO_CLK_EN_C			(1U<<2)
+//---------------------------------------------
+
+
+#define USER_LED1_MODER 		(1U<<0)
+#define USER_LED1_MODER2 		(1U<<1)
+
+#define USER_LED2_MODER 		(1U<<14)
+#define USER_LED2_MODER2 		(1U<<15)
+
+#define USER_LED3_MODER 		(1U<<28)
+#define USER_LED3_MODER2 		(1U<<29)
+
+#define USER_USER_B1_MODER 		(1U<<28)
+#define USER_USER_B1_MODER2		(1U<<29)
+
+
+#define USER_LED1		 		(1U<<0) 	//Green LED
+#define USER_LED2		 		(1U<<7) 	//Blue LED
+#define USER_LED3		 		(1U<<14) 	//Red LED
+
+int main(void)
+{
+	//*Enable clock access for Port B*/
+	//RCC_AHB1EN_R  |= GPIO_CLK_EN_B;
+	RCC->AHB1ENR |= GPIO_CLK_EN_B;
+
+	//*Configure LED pins as output pins*/
+	//GPIOB_MODE_R |= USER_LED1_MODER | USER_LED2_MODER | USER_LED3_MODER;
+	GPIOB->MODER |= USER_LED1_MODER | USER_LED2_MODER | USER_LED3_MODER;
+
+while(1)
+{
+	//*Toggle on all LEDS*/
+	//GPIOB_ODR_R |= USER_LED1 | USER_LED2 | USER_LED3;
+
+	//*Turn on/off all LEDS*/
+	//GPIOB_ODR_R ^= USER_LED1 | USER_LED2 | USER_LED3;
+	//GPIOB->ODR ^= USER_LED1 | USER_LED2 | USER_LED3;
+	GPIOB->BSRR = (1U<<0) | (1U<<7) | (1U<<14);
+	for(int i = 0;i<1000000;i++){}
+
+	GPIOB->BSRR = (1U<<16) | (1U<<23) | (1U<<30);
+	for(int i = 0;i<1000000;i++){}
+}
+
+}
