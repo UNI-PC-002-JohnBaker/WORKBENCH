@@ -63,6 +63,9 @@ void set_apb2_periphclock(uint32_t perihs);
 void set_pin_mode(GPIO_TypeDef *GPIOx, uint32_t Pin, uint32_t Mode);
 void config_uart_parameters(USART_TypeDef *USARTx, uint32_t DataWidth, uint32_t Parity, uint32_t StopBits);
 
+uint32_t comput_uart_div(uint32_t PeriphClk, uint32_t BaudRate);
+void uart_set_baudrate(USART_TypeDef *USARTx, uint32_t PeriphClk, uint32_t BaudRate);
+
 
 
 int main(void)
@@ -143,9 +146,15 @@ void uart3_tx_init(void)
 	/*Enable USART*/
 }
 
+//void uart_set_baudrate(USART_TypeDev *USARTx, unit32_t PeriphClk, uint32_t BaudRate)
+//{
+//	USARTx->BRR =
+//}
 
-
-
+void uart_set_baudrate(USART_TypeDef *USARTx, uint32_t PeriphClk, uint32_t BaudRate)
+		{
+	USARTx->BRR = comput_uart_div(PeriphClk, BaudRate);
+		}
 
 void config_uart_parameters(USART_TypeDef *USARTx, uint32_t DataWidth, uint32_t Parity, uint32_t StopBits)
 {
@@ -213,3 +222,7 @@ void set_pin_mode(GPIO_TypeDef *GPIOx, uint32_t Pin, uint32_t Mode)
 
 }
 
+uint32_t comput_uart_div(uint32_t PeriphClk, uint32_t BaudRate)
+{
+	return ((PeriphClk + BaudRate/2)/BaudRate);
+}
