@@ -14,6 +14,9 @@
 //RCC AHB1 peripheral clock register (RCC_AHB1ENR)
 //GPIO port mode register (GPIOx_MODER)
 
+//*ALTERNATE FUNCTION:AF7
+// USART3 Tx:PD8
+// USART3 Rx:PD9
 
 //Symbolic name for enables of GPIOs (macros)
 #define GPIO_CLK_EN_B			(1U<<1)
@@ -42,11 +45,18 @@
 #define PIN13		 		    (1U<<13)   // Input pin
 #define BTN_PIN  				PIN13
 
+#define  GPIODEN				(1U<<3)
+
+set_ahb1_periphclock(uint32_t perihs);
+
+set_pin_mode(GPIO_TypeDef *GPIOx, uint32_t Pin, uint32_t Mode);
+
+
 int main(void)
 {
 	//*Enable clock access for Port B*/
 	//RCC_AHB1EN_R  |= GPIO_CLK_EN_B;
-	RCC->AHB1ENR |= GPIO_CLK_EN_B;
+	RCC->AHB1ENR |= GPIO_CLK_EN_B;  //
 
 	//*Enable clock access for Port c*/
 	RCC->AHB1ENR |= GPIO_CLK_EN_C;
@@ -80,5 +90,89 @@ while(1)
 	//for(int i = 0;i<1000000;i++){}
 	}
 }
+
+void uart3_tx_init(void)
+{
+	/*1. Enable clock access to GPIOD*/
+	set_ahb1_periphclock(GPIODEN); //RCC->AHB1ENR |= GPIODEN
+
+	/*2. Set PD8 mode to alternate function*/
+
+
+	/*3. Set alternate function to USART*/
+
+
+
+
+	/*Enable clock to USART module*/
+	/*Configure USART parameters*/
+	/*Set baudrate*/
+	/*Enable USART*/
+
+
+
+
+
+
+}
+
+void set_ahb1_periphclock(uint32_t perihs)
+		{
+			//RCC->AHP1ENR |= perihs;
+			SET_BIT(RCC->AHB1ENR,perihs);
+		}
+
+void set_ahb2_periphclock(uint32_t perihs)
+		{
+			//RCC->AHP1ENR |= perihs;
+			SET_BIT(RCC->AHB2ENR,perihs);
+		}
+
+void set_apb1_periphclock(uint32_t perihs)
+		{
+			//RCC->AHP1ENR |= perihs;
+			SET_BIT(RCC->APB1ENR,perihs);
+		}
+
+void set_apb2_periphclock(uint32_t perihs)
+		{
+			//RCC->AHP1ENR |= perihs;
+			SET_BIT(RCC->APB2ENR,perihs);
+		}
+
+
+void set_pin_mode(GPIO_TypeDef *GPIOx, uint32_t Pin, uint32_t Mode)
+
+	{
+	/*Direct EXAMPLE*/
+	//Clear the relevant bits in the mode register
+	//GPIO->MODER  &=~(1U<<16);
+	//GPIO->MODER  &=~(1U<<18);
+
+	//Set the relevant bits in the mode register
+	//GPIO->MODER  |=(1U<<17);
+	//---------------------------------------------
+
+
+	// *MODIFY_REG ex.
+
+	/* 0x3 = 0b 11
+	 * POSITION_VAL(1U<<8)
+	 *
+	 * (1U<<8) = 0000 0000 0000 0000 0000 0001 0000 0000
+	 * rbit    = 0000 0000 1000 0000 0000 0000 0000 0000
+	 * clz = 8
+	 * POSITION_VAL(1U<<8) * 2 = 16
+	 * 03x3 << 16 = (1U<<16 | (1U<<17)
+	 * CLEAR (1U<<16 | (1U<<17) )  ==>   &=~((1U<<16) | (1U<<17))
+	 *
+	 * Mode = 0b 10 = 0x2
+	 * 2 << 16 ==> bit16 = 0, bit 17 = 1
+	 */
+
+	MODIFY_REG(GPIOx->MODER, (0x3 << (POSITION_VAL(Pin) * 2U)), (Mode << (POSITION_VAL(Pin) * 2U)));
+
+	}
+
 
 }
