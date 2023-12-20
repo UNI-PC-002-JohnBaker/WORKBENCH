@@ -65,7 +65,7 @@ void config_uart_parameters(USART_TypeDef *USARTx, uint32_t DataWidth, uint32_t 
 
 uint32_t comput_uart_div(uint32_t PeriphClk, uint32_t BaudRate);
 void uart_set_baudrate(USART_TypeDef *USARTx, uint32_t PeriphClk, uint32_t BaudRate);
-
+void uart_enable(USART_TypeDef *USARTx);
 
 
 int main(void)
@@ -143,13 +143,22 @@ void uart3_tx_init(void)
 	config_uart_parameters(USART3, UART_DATAWIDTH_8B, UART_PARITY_NONE, UART_STOPBITS_1);
 
 	/*Set baudrate*/
+	uart_set_baudrate(USART3, 15000000, 115200);
+
 	/*Enable USART*/
+	//USART3->CR1 |= USART_CR1_UE;
+	//or
+	//SET_BIT(USART3->CR1,USART_CR1_UE);
+	//or use a wrapper function
+	uart_enable(USART3);
+
+
 }
 
-//void uart_set_baudrate(USART_TypeDev *USARTx, unit32_t PeriphClk, uint32_t BaudRate)
-//{
-//	USARTx->BRR =
-//}
+void uart_enable(USART_TypeDef *USARTx)
+{
+	SET_BIT(USARTx->CR1,USART_CR1_UE);
+}
 
 void uart_set_baudrate(USART_TypeDef *USARTx, uint32_t PeriphClk, uint32_t BaudRate)
 		{
