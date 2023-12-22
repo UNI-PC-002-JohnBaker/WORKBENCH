@@ -55,6 +55,9 @@
 #define UART_PARITY_NONE		0x00000000U
 #define UART_STOPBITS_1 		0x00000000U
 
+#define baud_9600               0x0683U
+
+
 void set_ahb1_periphclock(uint32_t perihs);
 void set_ahb2_periphclock(uint32_t perihs);
 void set_apb1_periphclock(uint32_t perihs);
@@ -71,10 +74,11 @@ void uart3_tx_init(void);
 void uart_write(USART_TypeDef *USARTx, uint32_t value);
 void set_uart_transfer_direction(USART_TypeDef *USARTx, uint32_t TransferDirection);
 
+void delayMs (int n);
 
 int main(void)
 {
-	int x;
+	//int x;
 	uart3_tx_init();
 	set_uart_transfer_direction(USART3, USART_CR1_TE);
 
@@ -99,13 +103,24 @@ int main(void)
 
 
 
-		uart_write(USART3, 'A');
+		uart_write(USART3, 'Y');
+		//delayMs (30);  //leave a gap between messages
+		uart_write(USART3, 'E');
+		//delayMs (30);  //leave a gap between messages
+		uart_write(USART3, 'S');
+		//delayMs (200);  /*leave a gap between messages
+		uart_write(USART3, ' ');
+		uart_write(USART3, ' ');
+
+		delayMs (300);  /*leave a gap between messages
+		/*
+
 			for(int i=0; i<9000;i++)
 			{
 				x++;
 			}
 
-
+              */
 
 
 
@@ -149,6 +164,14 @@ int main(void)
 
 	}
 }
+
+void delayMs (int n)
+{
+	int i;
+	for (; n > 0; n--)
+		for (i = 0; i < 8000; i++);
+}
+
 
 void uart_write(USART_TypeDef *USARTx, uint32_t value)
 {
@@ -194,7 +217,8 @@ void uart3_tx_init(void)
 	config_uart_parameters(USART3, UART_DATAWIDTH_8B, UART_PARITY_NONE, UART_STOPBITS_1);
 
 	/*Set baudrate*/
-	uart_set_baudrate(USART3, 15000000, 19200);
+	//uart_set_baudrate(USART3, 15000000, 57600);
+	USART3->BRR = baud_9600;    /* 9600 baud@ 16MHz */
 
 	/*Enable USART*/
 	//USART3->CR1 |= USART_CR1_UE;
