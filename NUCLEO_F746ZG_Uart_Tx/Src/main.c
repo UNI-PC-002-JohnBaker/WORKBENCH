@@ -102,33 +102,6 @@ int main(void)
 	{
 
 
-
-		uart_write(USART3, 'Y');
-		//delayMs (30);  //leave a gap between messages
-		uart_write(USART3, 'E');
-		//delayMs (30);  //leave a gap between messages
-		uart_write(USART3, 'S');
-		//delayMs (200);  /*leave a gap between messages
-		uart_write(USART3, ' ');
-		uart_write(USART3, ' ');
-
-		delayMs (300);  /*leave a gap between messages
-		/*
-
-			for(int i=0; i<9000;i++)
-			{
-				x++;
-			}
-
-              */
-
-
-
-
-
-
-			/*
-
 		//Toggle on all LEDS/
 		//GPIOB_ODR_R |= USER_LED1 | USER_LED2 | USER_LED3;
 
@@ -143,6 +116,26 @@ int main(void)
 			//for(int i = 0;i<1000000;i++){}
 
 
+			uart_write(USART3, 'Y');
+					//delayMs (30);  //leave a gap between messages
+					uart_write(USART3, 'E');
+					//delayMs (30);  //leave a gap between messages
+					uart_write(USART3, 'S');
+					//delayMs (200);  /*leave a gap between messages
+					uart_write(USART3, ' ');
+					uart_write(USART3, ' ');
+
+					delayMs (300);  /*leave a gap between messages
+					/*
+
+						for(int i=0; i<9000;i++)
+						{
+							x++;
+						}
+
+			              */
+
+
 		}
 
 		else
@@ -152,7 +145,7 @@ int main(void)
 
 
 		}
-		*/
+
 
 
 
