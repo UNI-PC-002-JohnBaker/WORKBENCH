@@ -1,0 +1,10 @@
+06:11:19 **** Incremental Build of configuration Debug for project NUCLEO_F746ZG ****
+make -j20 all 
+arm-none-eabi-size  NUCLEO_F746ZG.elf 
+   text	   data	    bss	    dec	    hex	filename
+    788	      8	   1568	   2364	    93c	NUCLEO_F746ZG.elf
+Finished building: default.size.stdout
+ 
+
+06:11:20 Build Finished. 0 errors, 0 warnings. (took 618ms)
+

@@ -1,0 +1,17 @@
+10:51:34 **** Incremental Build of configuration Debug for project STM32F439ZIT6 ****
+make -j20 all 
+arm-none-eabi-gcc "../Src/main.c" -mcpu=cortex-m4 -std=gnu11 -g3 -DDEBUG -DSTM32 -DSTM32F4 -DSTM32F439ZITx -c -I../Inc -O0 -ffunction-sections -fdata-sections -Wall -fstack-usage -fcyclomatic-complexity -MMD -MP -MF"Src/main.d" -MT"Src/main.o" --specs=nano.specs -mfpu=fpv4-sp-d16 -mfloat-abi=hard -mthumb -o "Src/main.o"
+arm-none-eabi-gcc -o "STM32F439ZIT6.elf" @"objects.list"   -mcpu=cortex-m4 -T"E:\workspace_1.14.0\STM32F439ZIT6\STM32F439ZITX_FLASH.ld" --specs=nosys.specs -Wl,-Map="STM32F439ZIT6.map" -Wl,--gc-sections -static --specs=nano.specs -mfpu=fpv4-sp-d16 -mfloat-abi=hard -mthumb -Wl,--start-group -lc -lm -Wl,--end-group
+Finished building target: STM32F439ZIT6.elf
+ 
+arm-none-eabi-size  STM32F439ZIT6.elf 
+arm-none-eabi-objdump -h -S STM32F439ZIT6.elf  > "STM32F439ZIT6.list"
+   text	   data	    bss	    dec	    hex	filename
+    760	      8	   1568	   2336	    920	STM32F439ZIT6.elf
+Finished building: default.size.stdout
+ 
+Finished building: STM32F439ZIT6.list
+ 
+
+10:51:36 Build Finished. 0 errors, 0 warnings. (took 1s.903ms)
+

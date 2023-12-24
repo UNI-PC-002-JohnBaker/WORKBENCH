@@ -1,0 +1,17 @@
+07:02:56 **** Build of configuration Debug for project NUCLEO_F746ZG_Input ****
+make -j20 all 
+arm-none-eabi-gcc "../Src/main.c" -mcpu=cortex-m7 -std=gnu11 -g3 -DDEBUG -DSTM32 -DNUCLEO_F746ZG -DSTM32F746ZGTx -DSTM32F7 -DSTM32F746xx -c -I../Inc -I"E:/workspace_1.14.0/NUCLEO_F746ZG_Headers/chip_headers/Include" -I"E:/workspace_1.14.0/NUCLEO_F746ZG_Headers/chip_headers/Device/ST/STM32F7xx/Include" -O0 -ffunction-sections -fdata-sections -Wall -fstack-usage -fcyclomatic-complexity -MMD -MP -MF"Src/main.d" -MT"Src/main.o" --specs=nano.specs -mfpu=fpv5-sp-d16 -mfloat-abi=hard -mthumb -o "Src/main.o"
+arm-none-eabi-gcc -o "NUCLEO_F746ZG_Input.elf" @"objects.list"   -mcpu=cortex-m7 -T"E:\workspace_1.14.0\NUCLEO_F746ZG_Input\STM32F746ZGTX_FLASH.ld" --specs=nosys.specs -Wl,-Map="NUCLEO_F746ZG_Input.map" -Wl,--gc-sections -static --specs=nano.specs -mfpu=fpv5-sp-d16 -mfloat-abi=hard -mthumb -Wl,--start-group -lc -lm -Wl,--end-group
+Finished building target: NUCLEO_F746ZG_Input.elf
+ 
+arm-none-eabi-size  NUCLEO_F746ZG_Input.elf 
+arm-none-eabi-objdump -h -S NUCLEO_F746ZG_Input.elf  > "NUCLEO_F746ZG_Input.list"
+   text	   data	    bss	    dec	    hex	filename
+    816	      8	   1568	   2392	    958	NUCLEO_F746ZG_Input.elf
+Finished building: default.size.stdout
+ 
+Finished building: NUCLEO_F746ZG_Input.list
+ 
+
+07:02:58 Build Finished. 0 errors, 0 warnings. (took 2s.213ms)
+

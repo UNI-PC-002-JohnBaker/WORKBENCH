@@ -1,0 +1,10 @@
+18:41:08 **** Incremental Build of configuration Debug for project CDC_Device_TX ****
+make -j20 all 
+arm-none-eabi-size  CDC_Device_TX.elf 
+   text	   data	    bss	    dec	    hex	filename
+  31560	    356	   9556	  41472	   a200	CDC_Device_TX.elf
+Finished building: default.size.stdout
+ 
+
+18:41:09 Build Finished. 0 errors, 0 warnings. (took 814ms)
+

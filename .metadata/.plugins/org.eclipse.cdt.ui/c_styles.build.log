@@ -1,0 +1,17 @@
+06:49:44 **** Incremental Build of configuration Debug for project c_styles ****
+Info: Internal Builder is used for build
+gcc -std=c99 -O0 -g3 -Wall -c -fmessage-length=0 -o main.o "..\\main.c" 
+..\main.c: In function 'main':
+..\main.c:24:7: warning: unused variable 'vals' [-Wunused-variable]
+   int vals[] = {1, 2, 3, 4};
+       ^~~~
+..\main.c:23:7: warning: unused variable 'nums' [-Wunused-variable]
+   int nums[5];
+       ^~~~
+..\main.c:19:12: warning: unused variable 'totalGreenApples' [-Wunused-variable]
+   uint16_t totalGreenApples = 15;
+            ^~~~~~~~~~~~~~~~
+gcc -o c_styles.exe main.o 
+
+06:49:45 Build Finished. 0 errors, 3 warnings. (took 1s.262ms)
+

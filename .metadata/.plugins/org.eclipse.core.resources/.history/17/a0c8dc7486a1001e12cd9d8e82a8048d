@@ -1,0 +1,31 @@
+/*
+ * main.c
+ *
+ *  Created on: Dec 22, 2023
+ *      Author: jbake
+ */
+
+#include <stdio.h>
+#include <stdint.h>
+
+int main(void)
+{
+  uint16_t totalGreenApples = 15;
+
+  int x = 10;
+  char c = 'K';
+  int nums[5];
+  int vals[] = {1, 2, 3, 4};
+
+  char hello[] = {'H', 'e', 'l', 'l', 'o', '\0'};            // null character added at end
+  char world[] = "world";
+
+
+  printf("Hello World\n");
+
+  printf("x=%d, c=%c\n", x, c  ");
+  printf("x=%x, c=%c\n", x, c  ");
+
+  getchar();
+  return 0;
+}

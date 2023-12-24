@@ -1,0 +1,17 @@
+/*
+ * main.c
+ *
+ *  Created on: Dec 22, 2023
+ *      Author: jbake
+ */
+
+#include <stdio.h>
+
+int main(void)
+{
+  uint32_t totalGreenApples = 15;
+
+  printf("Hello World");
+  getchar();
+  return 0;
+}

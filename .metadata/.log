@@ -1,0 +1,3 @@
+
+!ENTRY org.eclipse.cdt.core 1 0 2023-12-23 20:35:18.174
+!MESSAGE Indexed 'NUCLEO_F746ZG_HAL_TIMER' (28 sources, 119 headers) in 2.86 sec: 12,598 declarations; 64,321 references; 2 unresolved inclusions; 42 syntax errors; 147 unresolved names (0.19%)

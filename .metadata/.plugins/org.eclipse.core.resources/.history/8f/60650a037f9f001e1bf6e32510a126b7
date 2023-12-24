@@ -1,0 +1,270 @@
+#include "stm32f7xx.h"
+
+
+//#include <stdint.h>
+
+
+//User LD1: a green user LED is connected to the STM32 I/O PB0 (RCC_AHB1ENR = 2), (GPIOB_MODER = 01 pin0,1)
+//User LD2: a blue user LED is connected to PB7. (GPIOB_MODER = 01 pin15,14)
+//User LD3: a red user LED is connected to PB14. (GPIOB_MODER = 01 pin29,28)
+
+//B1 USER: the user button is connected to the I/O PC13 by default.
+//(RCC_AHB1ENR = 4)(GPIOC_MODER = 00 pin27,26)
+
+//RCC AHB1 peripheral clock register (RCC_AHB1ENR)
+//GPIO port mode register (GPIOx_MODER)
+
+//*ALTERNATE FUNCTION:AF7
+// USART3 Tx:PD8
+// USART3 Rx:PD9
+
+//Symbolic name for enables of GPIOs (macros)
+#define GPIO_CLK_EN_B			(1U<<1)
+#define GPIO_CLK_EN_C			(1U<<2)
+//---------------------------------------------
+
+
+#define USER_LED1_MODER 		(1U<<0)
+#define USER_LED1_MODER2 		(1U<<1)
+
+#define USER_LED2_MODER 		(1U<<14)
+#define USER_LED2_MODER2 		(1U<<15)
+
+#define USER_LED3_MODER 		(1U<<28)
+#define USER_LED3_MODER2 		(1U<<29)
+
+#define USER_USER_B1_MODER 		(1U<<27)
+#define USER_USER_B1_MODER2		(1U<<26)
+
+
+#define USER_LED1		 		(1U<<0) 	//Green LED
+#define USER_LED2		 		(1U<<7) 	//Blue LED
+#define USER_LED3		 		(1U<<14) 	//Red LED
+
+
+#define PIN13		 		    (1U<<13)   // Input pin
+#define BTN_PIN  				PIN13
+
+#define  GPIODEN				(1U<<3)
+#define  UART3_TX  				(1U<<8)
+#define  GPIO_ALTERNATE_MODE	 0x2  //0b10
+
+#define  UART3EN				(1U<<18)
+
+#define UART_DATAWIDTH_8B		0x00000000U   /*8 bits word length: Start bit, 8 data bits*/
+#define UART_PARITY_NONE		0x00000000U
+#define UART_STOPBITS_1 		0x00000000U
+
+void set_ahb1_periphclock(uint32_t perihs);
+void set_ahb2_periphclock(uint32_t perihs);
+void set_apb1_periphclock(uint32_t perihs);
+void set_apb2_periphclock(uint32_t perihs);
+
+void set_pin_mode(GPIO_TypeDef *GPIOx, uint32_t Pin, uint32_t Mode);
+void config_uart_parameters(USART_TypeDef *USARTx, uint32_t DataWidth, uint32_t Parity, uint32_t StopBits);
+
+uint32_t comput_uart_div(uint32_t PeriphClk, uint32_t BaudRate);
+void uart_set_baudrate(USART_TypeDef *USARTx, uint32_t PeriphClk, uint32_t BaudRate);
+void uart_enable(USART_TypeDef *USARTx);
+void uart3_tx_init(void);
+
+void uart_write(USART_TypeDef *USARTx, uint32_t value);
+void set_uart_transfer_direction(USART_TypeDef *USARTx, uint32_t TransferDirection);
+
+
+int main(void)
+{
+	int x;
+	uart3_tx_init();
+	set_uart_transfer_direction(USART3, USART_CR1_TE);
+
+
+	//*Enable clock access for Port B*/
+	//RCC_AHB1EN_R  |= GPIO_CLK_EN_B;
+	RCC->AHB1ENR |= GPIO_CLK_EN_B;  //
+
+	//*Enable clock access for Port c*/
+	RCC->AHB1ENR |= GPIO_CLK_EN_C;
+	GPIOC->MODER &= ~USER_USER_B1_MODER;
+	GPIOC->MODER &= ~USER_USER_B1_MODER2;
+	//*Configure Button1 PC13 as input pin*/
+
+
+	//*Configure LED pins as output pins*/
+	//GPIOB_MODE_R |= USER_LED1_MODER | USER_LED2_MODER | USER_LED3_MODER;
+	GPIOB->MODER |= USER_LED1_MODER | USER_LED2_MODER | USER_LED3_MODER;
+
+	while(1)
+	{
+		//*Toggle on all LEDS*/
+		//GPIOB_ODR_R |= USER_LED1 | USER_LED2 | USER_LED3;
+
+		//*Check input (GPIOC_IDR:13)
+		if(GPIOC->IDR & BTN_PIN)
+
+		{
+			//*Turn on/off all LEDS*/
+			//GPIOB_ODR_R ^= USER_LED1 | USER_LED2 | USER_LED3;
+			//GPIOB->ODR ^= USER_LED1 | USER_LED2 | USER_LED3;
+			GPIOB->BSRR = (1U<<0) | (1U<<7) | (1U<<14);
+			//for(int i = 0;i<1000000;i++){}
+
+
+		}
+
+		else
+		{
+			GPIOB->BSRR = (1U<<16) | (1U<<23) | (1U<<30);
+			//for(int i = 0;i<1000000;i++){}
+
+			uart_write(USART3, 'A');
+				for(int i=0; i<9000;i++)
+				{
+					x++;
+				}
+		}
+	}
+}
+
+void uart_write(USART_TypeDef *USARTx, uint32_t value)
+{
+	/*Make sure transmit data register is empty*/
+	 //USARTx->ISR & (1U<<7);
+	//while(!((USARTx->ISR & USART_ISR_TXE) == USART_ISR_TXE)){}
+	while(!(USARTx->ISR & USART_ISR_TXE)){}
+
+	/*Write value into transmit data register*/
+	USARTx->TDR = value;
+}
+
+
+void uart3_tx_init(void)
+{
+	/*1. Enable clock access to GPIOD*/
+	set_ahb1_periphclock(GPIODEN); //RCC->AHB1ENR |= GPIODEN
+
+	/*2. Set PD8 mode to alternate function*/
+	set_pin_mode(GPIOD, UART3_TX, GPIO_ALTERNATE_MODE);
+
+	/*3. Set alternate function to USART*/
+
+
+
+	/*STM32F746xx alternate function mapping
+	(page. 76 DS) ==> ALTERNATE FUNCTION:AF7
+					USART3 TX:PD8 ==> 0111 to AFR[1]:AFR8[3:0]
+					USART3 RX:PD9 ==> 0111 to AFR[1]:AFR9[3:0]
+	*/
+
+	//AFR[1] = GPIOx_AFRH,  AFR[0] = GPIOx_AFRL
+	//alternative is use compact function but im not ready
+	GPIOD->AFR[1] |=  (1U<<0);
+	GPIOD->AFR[1] |=  (1U<<1);
+	GPIOD->AFR[1] |=  (1U<<2);
+	GPIOD->AFR[1] &= ~(1U<<3);
+
+	/*Enable clock to USART module*/
+	set_apb1_periphclock(UART3EN);
+
+	/*Configure USART parameters*/
+	config_uart_parameters(USART3, UART_DATAWIDTH_8B, UART_PARITY_NONE, UART_STOPBITS_1);
+
+	/*Set baudrate*/
+	uart_set_baudrate(USART3, 15000000, 115200);
+
+	/*Enable USART*/
+	//USART3->CR1 |= USART_CR1_UE;
+	//or
+	//SET_BIT(USART3->CR1,USART_CR1_UE);
+	//or use a wrapper function
+	uart_enable(USART3);
+
+
+}
+
+void uart_enable(USART_TypeDef *USARTx)
+{
+	SET_BIT(USARTx->CR1,USART_CR1_UE);
+}
+
+void set_uart_transfer_direction(USART_TypeDef *USARTx, uint32_t TransferDirection)
+{
+	MODIFY_REG(USARTx->CR1, USART_CR1_RE | USART_CR1_TE, TransferDirection);
+}
+
+
+void uart_set_baudrate(USART_TypeDef *USARTx, uint32_t PeriphClk, uint32_t BaudRate)
+		{
+	USARTx->BRR = comput_uart_div(PeriphClk, BaudRate);
+		}
+
+void config_uart_parameters(USART_TypeDef *USARTx, uint32_t DataWidth, uint32_t Parity, uint32_t StopBits)
+{
+	MODIFY_REG(USARTx->CR1, USART_CR1_PS | USART_CR1_PCE | USART_CR1_M, Parity | DataWidth);
+	MODIFY_REG(USARTx->CR2, USART_CR2_STOP, StopBits);
+
+}
+
+
+void set_ahb1_periphclock(uint32_t perihs)
+{
+		//RCC->AHP1ENR |= perihs;
+		SET_BIT(RCC->AHB1ENR,perihs);
+}
+
+void set_ahb2_periphclock(uint32_t perihs)
+{
+		//RCC->AHP1ENR |= perihs;
+		SET_BIT(RCC->AHB2ENR,perihs);
+}
+
+void set_apb1_periphclock(uint32_t perihs)
+{
+		//RCC->AHP1ENR |= perihs;
+		SET_BIT(RCC->APB1ENR,perihs);
+}
+
+void set_apb2_periphclock(uint32_t perihs)
+{
+		//RCC->AHP1ENR |= perihs;
+		SET_BIT(RCC->APB2ENR,perihs);
+}
+
+
+void set_pin_mode(GPIO_TypeDef *GPIOx, uint32_t Pin, uint32_t Mode)
+
+{
+	/*Direct EXAMPLE*/
+	//Clear the relevant bits in the mode register
+	//GPIO->MODER  &=~(1U<<16);
+	//GPIO->MODER  &=~(1U<<18);
+
+	//Set the relevant bits in the mode register
+	//GPIO->MODER  |=(1U<<17);
+	//---------------------------------------------
+
+
+	// *MODIFY_REG ex.
+
+	/* 0x3 = 0b 11
+	 * POSITION_VAL(1U<<8)
+	 *
+	 * (1U<<8) = 0000 0000 0000 0000 0000 0001 0000 0000
+	 * rbit    = 0000 0000 1000 0000 0000 0000 0000 0000
+	 * clz = 8
+	 * POSITION_VAL(1U<<8) * 2 = 16
+	 * 03x3 << 16 = (1U<<16 | (1U<<17)
+	 * CLEAR (1U<<16 | (1U<<17) )  ==>   &=~((1U<<16) | (1U<<17))
+	 *
+	 * Mode = 0b 10 = 0x2
+	 * 2 << 16 ==> bit16 = 0, bit 17 = 1
+	 */
+
+	MODIFY_REG(GPIOx->MODER, (0x3 << (POSITION_VAL(Pin) * 2U)), (Mode << (POSITION_VAL(Pin) * 2U)));
+
+}
+
+uint32_t comput_uart_div(uint32_t PeriphClk, uint32_t BaudRate)
+{
+	return ((PeriphClk + BaudRate/2)/BaudRate);
+}
